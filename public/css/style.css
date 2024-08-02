@@ -1,0 +1,36 @@
+/* custom color */
+:root {
+    --primary: #021526;
+    --secondary: #6c757d;
+    --success: #28a745;
+    --info: #17a2b8;
+    --warning: #ffc107;
+    --danger: #dc3545;
+    --light: #f8f9fa;
+    --dark: #343a40;
+}
+
+body {
+    display: flex;
+    min-height: 100vh;
+    margin: 0;
+}
+.sidebar {
+    width: 300px;
+    background-color: var(--primary);
+    color: white;
+    padding: 15px;
+}
+.sidebar a {
+    text-decoration: none;
+    padding: 10px 20px;
+}
+.sidebar a span {
+    color: white;
+    opacity: 0.7;
+}
+.sidebar a:hover {
+    color: white;
+    background-color: #0c2133;
+    border-radius: 5px;
+}

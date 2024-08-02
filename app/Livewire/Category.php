@@ -16,8 +16,8 @@ class Category extends Component
 
     public function render()
     {
-        $kategori = CategoryModel::all();
-        return view('livewire.category', compact('kategori'));
+        $category = CategoryModel::all();
+        return view('livewire.category', compact('category'))->layout('layouts.app');
     }
 
     public function create()

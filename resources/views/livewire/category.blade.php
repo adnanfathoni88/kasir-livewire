@@ -58,9 +58,9 @@
     </div>
 
     {{-- konten --}}
-    <div class=" container mt-4">
+    <div class=" container">
         <div class="d-flex justify-content-between align-items-center">
-            <h1>Category</h1>
+            <h1>Kategori</h1>
             <div>
                 <button wire:click="create" type="button" class="btn btn-primary">
                     Tambah
@@ -98,7 +98,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($kategori as $k)
+                    @foreach($category as $k)
                     <tr>
                         <th scope="row">{{ $loop->iteration }}</th>
                         <td>{{ $k->nama }}</td>
