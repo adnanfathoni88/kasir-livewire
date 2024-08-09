@@ -2,23 +2,46 @@
 
 namespace App\Livewire;
 
+use Midtrans\Snap;
+use Midtrans\Config;
 use Livewire\Component;
-use App\Models\Product as ProdukModel;
-use App\Models\Category as CategoryModel;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Product as ProdukModel;
+use Illuminate\Support\Facades\Request;
+use App\Models\Category as CategoryModel;
 
-class Produk extends Component
+class Product extends Component
 {
     use WithFileUploads;
 
 
-    public $produk_id, $code, $name, $price, $image, $category_id, $category_list, $current_image, $category_name, $product_name;
+    public $produk_id, $code, $name, $price, $image, $category_id, $category_list, $current_image, $category_name, $product_name, $total;
+
     public $isEdit = false;
+    public $cart = [];
+
+    // midtrans
+    public $snapToken;
+
+    public function mount()
+    {
+        $this->cart = session()->get('cart') ?? [];
+        $this->getTotal();
+    }
 
     public function render()
     {
         $product = ProdukModel::with('category')->get();
-        return view('livewire.produk', compact('product'))->layout('layouts.app');
+
+        // dd($this->cart);
+        // dd(Auth::user()->role);
+
+        if (Auth::user()->role == 'admin') {
+            return view('livewire.admin.produk', compact('product'))->layout('layouts.admin');
+        } else {
+            return view('livewire.user.produk', compact('product'))->layout('layouts.user');
+        }
     }
 
     public function create()
@@ -157,6 +180,106 @@ class Produk extends Component
                 'id' => $item->id,
                 'nama' => $item->nama,
             ];
+        }
+    }
+
+    public function addToCart($id)
+    {
+        $produk = ProdukModel::find($id);
+
+        if ($produk) {
+
+            $this->cart = session()->get('cart') ?? [];
+
+            // jika produk sama
+            foreach ($this->cart as $key => $item) {
+                if ($item['id'] == $produk->id) {
+                    $this->cart[$key]['qty'] += 1;
+                    $this->cart[$key]['subTotal'] = $this->cart[$key]['qty'] * $this->cart[$key]['price'];
+
+                    session()->put('cart', $this->cart);
+                    session()->flash('success', 'Produk ' . $produk->name .  ' berhasil ditambahkan ke keranjang');
+                    $this->getTotal();
+                    return;
+                }
+            }
+
+            // tambahkan produk ke cart
+            $this->cart[] = [
+                'id' => $produk->id,
+                'code' => $produk->code,
+                'name' => $produk->name,
+                'price' => $produk->price,
+                'qty' => 1,
+                'subTotal' => $produk->price,
+            ];
+
+            session()->put('cart', $this->cart);
+            session()->flash('success', 'Produk ' . $produk->name .  ' berhasil ditambahkan ke keranjang');
+        } else {
+            session()->flash('error', 'Produk tidak ditemukan');
+        }
+
+        $this->getTotal();
+    }
+
+    public function clearCart()
+    {
+        session()->forget('cart');
+        $this->cart = [];
+        $this->getTotal();
+    }
+    public function getTotal()
+    {
+        $this->total = 0;
+        foreach ($this->cart as $item) {
+            $this->total += $item['subTotal'];
+        }
+    }
+
+    public function createSnapToken()
+    {
+        Config::$serverKey = config('services.midtrans.serverKey');
+        Config::$isProduction = config('services.midtrans.isProduction');
+        Config::$isSanitized = config('services.midtrans.isSanitized');
+        Config::$is3ds = config('services.midtrans.is3ds');
+
+        $cart = session()->get('cart');
+
+        // new cart for mitrans (format)
+        $itemDetail = [];
+        foreach ($cart as $c) {
+            $itemDetail[] = [
+                'id' => $c['id'],
+                'price' => $c['price'],
+                'quantity' => $c['qty'],
+                'name' => $c['name'],
+            ];
+        }
+
+
+        // params   
+        $params = [
+            'transaction_details' => [
+                'order_id' => uniqid(),
+                'gross_amount' => $this->total, // Total amount
+            ],
+            'customer_details' => [
+                'first_name' => Auth::user()->name,
+                'email' => Auth::user()->email,
+            ],
+            'item_details' => $itemDetail,
+        ];
+
+        // dd($params);
+
+        $this->snapToken = Snap::getSnapToken($params);
+        $this->clearCart();
+
+        if ($this->snapToken) {
+            $this->dispatch('payment', ['token' => $this->snapToken]);
+        } else {
+            session()->flash('error', 'Token tidak ditemukan');
         }
     }
 }

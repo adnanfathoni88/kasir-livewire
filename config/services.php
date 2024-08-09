@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'midtrans' => [
+        'serverKey' => env('MIDTRANS_SERVER_KEY'), // server key
+        'clientKey' => env('MIDTRANS_CLIENT_KEY'), // client key
+        'isProduction' => env('MIDTRANS_IS_PRODUCTION', false), // production or sandbox
+        'isSanitized' => true, // untuk menyaring data sensitif
+        'is3ds' => true, // untuk 3d secure
+    ],
 ];

@@ -25,12 +25,32 @@ body {
     text-decoration: none;
     padding: 10px 20px;
 }
-.sidebar a span {
+.sidebar a span,
+.sidebar button span {
     color: white;
     opacity: 0.7;
 }
 .sidebar a:hover {
     color: white;
     background-color: #0c2133;
+    border-radius: 5px;
+}
+
+.sidebar button {
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    hover: pointer;
+}
+
+.sidebar button:hover {
+    background-color: #0c2133;
+}
+
+.sidebar .nav-link-active {
+    color: white;
+    background-color: #11273b;
     border-radius: 5px;
 }

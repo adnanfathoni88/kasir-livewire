@@ -180,7 +180,8 @@
                     <tr>
                         <th scope="row">{{ $loop->iteration }}</th>
                         <td><img src="{{ asset('storage/products/' . $p->image) }}"
-                                style="height: 100px; max-width:200px; object-fit:cover"></td>
+                                style="height: 100px; max-width:200px; object-fit:cover">
+                        </td>
                         <td>
                             {{ $p->code }}
                         </td>
